@@ -20,7 +20,13 @@ body {
   margin: 0;
   background: var(--page-bg);
   color: var(--text);
-  font-family: "Avenir Next", Arial, Helvetica, sans-serif;
+  font-family:
+  "Mundial",
+  "Avenir Next",
+  Avenir,
+  Helvetica,
+  Arial,
+  sans-serif;
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
   text-rendering: geometricPrecision;
