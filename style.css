@@ -1,3 +1,19 @@
+@font-face {
+  font-family: "Mundial";
+  src: url("fonts/Mundial-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Mundial";
+  src: url("fonts/Mundial-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --page-bg: #ffffff;
   --text: #5b5b5b;
