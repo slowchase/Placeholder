@@ -1,0 +1,971 @@
+@font-face {
+  font-family: "Mundial";
+  src: url("./fonts/Mundial-Regular.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Mundial";
+  src: url("./fonts/Mundial-Medium.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 500 700;
+  font-display: swap;
+}
+
+:root {
+  --ink: #0b0b0b;
+  --muted: #929292;
+  --line: #111111;
+  --green: #8bea98;
+  --green-active: #52db6a;
+  --bg: #fff;
+  --ease: cubic-bezier(.4, 0, .2, 1);
+  --font-sans: "Mundial", "Avenir Next", Avenir, Helvetica, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 100%; min-height: 100%; background: var(--bg); color: var(--ink); }
+body {
+  min-height: 100svh;
+  overflow: hidden;
+  overscroll-behavior: none;
+  font-family: var(--font-sans);
+}
+button, input { font: inherit; }
+button { -webkit-tap-highlight-color: transparent; }
+
+.page-shell {
+  min-height: 100svh;
+  position: relative;
+  display: grid;
+  grid-template-rows: 1fr;
+  padding: 0;
+  width: 100vw;
+  height: 100svh;
+}
+
+.brand {
+  margin: 0;
+  position: fixed;
+  top: 4.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  font-size: 3.15rem;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  z-index: 20;
+}
+
+.viewport {
+  width: 100vw;
+  height: 100svh;
+  min-height: 100svh;
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: visible;
+  touch-action: none;
+}
+
+.solar-system {
+  width: 100vw;
+  height: 100svh;
+  aspect-ratio: auto;
+  position: relative;
+  --camera-zoom: 1;
+}
+
+/* Stage 1 camera fix: the SVG viewBox stays fixed. Camera zoom is applied to
+   one internal SVG group, while the SVG element itself is never zoom-scaled. */
+.orbit-svg { width: 100%; height: 100%; overflow: hidden; display: block; preserve-aspect-ratio: xMidYMid slice; }
+
+.logical-ring { cursor: default; }
+.logical-ring .path-copy,
+.logical-ring .path-hit { cursor: grab; }
+.logical-ring.is-text-dragging .path-copy,
+.logical-ring.is-text-dragging .path-hit { cursor: grabbing; }
+.ring-line,
+.ring-hit,
+.ring-text-path { vector-effect: non-scaling-stroke; }
+.ring-line {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 1.2;
+}
+.ring-hit {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 24;
+  pointer-events: stroke;
+}
+.path-hit {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 16px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  pointer-events: stroke;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 43px;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+}
+.path-copy {
+  fill: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 43px;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  transition: fill 240ms var(--ease);
+  pointer-events: visiblePainted;
+  cursor: pointer;
+}
+.logical-ring[data-kind="email"],
+.logical-ring[data-kind="email"] .path-copy,
+.logical-ring[data-kind="email"] .path-hit { cursor: text; }
+.logical-ring[data-kind="email"] .path-copy,
+.logical-ring[data-kind="email"] .path-hit { font-size: 45px; }
+.logical-ring[data-kind="email"] .path-copy { fill: var(--muted); }
+.logical-ring.is-subscribed .path-copy { fill: var(--green-active); }
+
+.email-box-caret {
+  font-size: 1em;
+  font-weight: 300;
+  letter-spacing: 0;
+  animation: email-caret-blink 1.05s steps(1, end) infinite;
+}
+
+@keyframes email-caret-blink {
+  0%, 48% { opacity: 1; }
+  49%, 100% { opacity: 0; }
+}
+
+.email-capture {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  left: 50%;
+  top: 50%;
+  opacity: 0;
+  border: 0;
+  padding: 0;
+  pointer-events: none;
+}
+
+.subscribe-button {
+  width: 8.7%;
+  aspect-ratio: 1;
+  min-width: 50px;
+  scale: var(--camera-zoom);
+  transform-origin: center;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) translate(var(--subscribe-hover-x, 0px), var(--subscribe-hover-y, 0px)) scale(var(--subscribe-hover-scale, 1));
+  border: 0;
+  border-radius: 50%;
+  background: var(--green);
+  color: white;
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  transition: background-color 280ms var(--ease), transform 220ms cubic-bezier(.2,.72,.18,1);
+}
+.subscribe-button:hover,
+.subscribe-button:focus-visible { --subscribe-hover-scale: 1.15; }
+.subscribe-button__svg { width: 100%; height: 100%; overflow: visible; pointer-events: none; position: relative; z-index: 2; }
+.subscribe-button__text {
+  fill: white;
+  font-family: var(--font-sans);
+  font-size: 13.667px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  opacity: 0;
+  transition: opacity 180ms var(--ease);
+}
+.subscribe-button:hover .subscribe-button__svg,
+.subscribe-button:focus-visible .subscribe-button__svg,
+.subscribe-button.is-subscribed .subscribe-button__svg { animation: button-spin 7s linear infinite; }
+.subscribe-button:hover .subscribe-button__text,
+.subscribe-button:focus-visible .subscribe-button__text,
+.subscribe-button.is-subscribed .subscribe-button__text,
+.subscribe-button.is-error .subscribe-button__text { opacity: 1; }
+.subscribe-button.is-subscribed { background: var(--green-active); }
+.subscribe-button.is-error { background: #111; }
+@keyframes button-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+
+.status-message {
+  position: absolute;
+  z-index: 30;
+  left: 50%;
+  bottom: 2.2rem;
+  transform: translateX(-50%);
+  margin: 0;
+  font-size: .72rem;
+  color: #777;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 180ms var(--ease);
+}
+.status-message.is-visible { opacity: 1; }
+
+@media (max-width: 900px) {
+  .center-plane::after { width: min(350px, 72vw); height: 110px; }
+  .page-shell { padding: 3.25rem 1rem 1rem; }
+  .brand { font-size: 2.65rem; }
+  .solar-system { width: 100vw; height: 100svh; }
+}
+
+@media (max-width: 600px) {
+  .page-shell { padding: 1.6rem 0 0; }
+  .brand { font-size: 2.25rem; text-align: left; padding-left: 1.1rem; }
+  .viewport { justify-items: center; align-items: center; }
+  .solar-system {
+    width: 100vw;
+    height: 100svh;
+    max-width: none;
+    translate: none;
+  }
+  .path-copy, .path-hit { font-size: 47px; }
+  .logical-ring[data-kind="email"] .path-copy,
+  .logical-ring[data-kind="email"] .path-hit { font-size: 48px; }
+  .subscribe-button { width: 9%; min-width: 44px; }
+  .subscribe-button__text { font-size: 13.167px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .subscribe-button,
+  .subscribe-button.is-subscribed { animation: none !important; }
+}
+
+
+/* During the morph we snapshot the current visual geometry into a dedicated
+   SVG layer. The live orbit layer is hidden so its independent rotations do
+   not fight the connected spiral geometry. */
+.solar-system.is-spiraling .subscribe-button {
+  pointer-events: none;
+}
+
+.spiral-reset-layer {
+  pointer-events: none;
+}
+.spiral-reset-line {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+}
+.spiral-reset-text {
+  fill: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 43px;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+}
+.spiral-reset-text[data-kind="email"] {
+  fill: var(--muted);
+  font-size: 45px;
+}
+.spiral-reset-text.is-subscribed {
+  fill: var(--green-active);
+}
+
+@media (max-width: 600px) {
+  .spiral-reset-text { font-size: 47px; }
+  .spiral-reset-text[data-kind="email"] { font-size: 48px; }
+}
+
+/* Seamless spiral handoff: freeze the live orbit while its exact geometry is
+   being sampled, and suppress only the live text during the final split. */
+#ringsLayer.is-line-handoff .path-copy,
+#ringsLayer.is-line-handoff .path-hit {
+  opacity: 0;
+}
+
+
+/* -------------------------------------------------------------------------
+   SATELLITE CENTER CONTROLS + SUBMIT-EVENT PLANE EXPERIMENT
+   ------------------------------------------------------------------------- */
+.solar-system { isolation: isolate; --plane-scale-y: 1; }
+.brand {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  color: inherit;
+  padding: 0;
+  cursor: default;
+}
+body.is-submission-mode .brand { cursor: pointer; }
+body.is-submission-mode .brand:hover { opacity: .58; }
+
+/* The SVG and HTML center controls flatten together, creating the edge-on
+   illusion without a 3D engine. The Y-scale is driven by the Submit Event transition; scroll/touch camera input remains enabled; only the visible instruction text is removed. */
+.orbit-svg,
+.center-plane {
+  transition: opacity 180ms ease;
+}
+.orbit-svg { scale: 1 var(--plane-scale-y); transform-origin: 50% 50%; }
+.center-plane {
+  position: absolute;
+  inset: 0;
+  scale: 1 var(--plane-scale-y);
+  transform-origin: 50% 50%;
+  pointer-events: none;
+  z-index: 12;
+}
+
+/* Hover-reveal center menu. The six small circles live directly behind Subscribe.
+   Hovering the green circle reveals them as a horizontal chain; moving across the
+   revealed circles keeps the chain open. Leaving the whole center plane retracts it. */
+.center-orbit-control {
+  position: absolute;
+  inset: 0;
+  scale: var(--camera-zoom);
+  translate: var(--menu-drift-x, 0px) var(--menu-drift-y, 0px);
+  transform-origin: center;
+  z-index: 8;
+  pointer-events: none;
+}
+/* Invisible hover bridge across the expanded row. It keeps the menu open while
+   the pointer crosses the deliberate gaps between circles, without covering the buttons. */
+.center-plane::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(590px, 48vw);
+  height: 110px;
+  transform: translate(var(--menu-drift-x, 0px), calc(-50% + var(--menu-drift-y, 0px)));
+  z-index: 2;
+  pointer-events: none;
+}
+.center-plane.is-menu-open::after,
+.center-plane:focus-within::after { pointer-events: auto; }
+.center-orbit-control--about     { --satellite-x: 103px; }
+.center-orbit-control--contact   { --satellite-x: 182px; }
+.center-orbit-control--highlight { --satellite-x: 261px; }
+.center-orbit-control--orbit     { --satellite-x: 340px; }
+.center-orbit-control--spiral    { --satellite-x: 419px; }
+.center-orbit-control--submit    { --satellite-x: 498px; }
+
+.satellite-button {
+  width: 4.9%;
+  aspect-ratio: 1;
+  min-width: 34px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) translate(0, 0) scale(.92);
+  transform-origin: center;
+  border: 0;
+  border-radius: 50%;
+  padding: 0;
+  pointer-events: none;
+  cursor: pointer;
+  opacity: 0;
+  overflow: hidden;
+  transition: transform 520ms cubic-bezier(.2,.72,.18,1), opacity 280ms ease;
+}
+.center-plane.is-menu-open .center-orbit-control .satellite-button,
+.center-plane:focus-within .center-orbit-control .satellite-button {
+  transform: translate(-50%, -50%) translate(calc(var(--satellite-x) + var(--hover-x, 0px)), var(--hover-y, 0px)) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+.center-plane.is-menu-open .satellite-button:hover,
+.center-plane:focus-within .satellite-button:focus-visible {
+  transform: translate(-50%, -50%) translate(calc(var(--satellite-x) + var(--hover-x, 0px)), var(--hover-y, 0px)) scale(1.30);
+  outline: none;
+}
+.satellite-button.is-gone { opacity: 0 !important; pointer-events: none !important; }
+/* Palette sampled visually from the supplied reference: warm off-white, muted green,
+   soft blue for Submit Event, then pale blue. */
+.satellite-button--about { background: #f2ece9; color: #1c1c1c; }
+.satellite-button--contact { background: #6f9468; color: #1c1c1c; }
+.satellite-button--highlight { background: #edf5f2; color: #1c1c1c; }
+.satellite-button--orbit { background: #fffdf2; color: #1c1c1c; }
+.satellite-button--spiral { background: #dceff7; color: #1c1c1c; }
+.satellite-button--submit { background: #98c4ea; color: #1c1c1c; border: 0; cursor: pointer; }
+
+.satellite-button__svg { width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.satellite-button__text {
+  fill: currentColor;
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  opacity: 0;
+  transition: opacity 180ms var(--ease);
+}
+.satellite-button:hover .satellite-button__text,
+.satellite-button:focus-visible .satellite-button__text { opacity: 1; }
+.satellite-button:hover .satellite-button__svg,
+.satellite-button:focus-visible .satellite-button__svg { animation: satellite-label-spin 7s linear infinite; }
+@keyframes satellite-label-spin { to { transform: rotate(-360deg); transform-origin: 50% 50%; } }
+
+
+@media (max-width: 900px) {
+  .center-orbit-control--about     { --satellite-x: 65px; }
+  .center-orbit-control--contact   { --satellite-x: 117px; }
+  .center-orbit-control--highlight { --satellite-x: 169px; }
+  .center-orbit-control--orbit     { --satellite-x: 221px; }
+  .center-orbit-control--spiral    { --satellite-x: 273px; }
+  .center-orbit-control--submit    { --satellite-x: 325px; }
+  .satellite-button { width: 5.1%; min-width: 30px; }
+}
+
+
+/* --- Highlight card ----------------------------------------------------- */
+.highlight-panel {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(660px, 90vw, 67.5svh);
+  aspect-ratio: 3 / 4;
+  transform: translate(-50%, -50%) scale(.96);
+  transform-origin: center;
+  background: rgba(255,255,255,.85);
+  z-index: 20;
+  opacity: 0;
+  pointer-events: none;
+  padding: 18px;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 16px;
+  transition: opacity 260ms ease, transform 420ms cubic-bezier(.2,.72,.18,1);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+.highlight-panel.is-open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, -50%) scale(1);
+}
+.highlight-panel__photo {
+  min-height: 0;
+  background: rgba(225,229,227,.72);
+  display: grid;
+  place-items: center;
+  color: #929292;
+  font-size: 12px;
+  letter-spacing: .01em;
+}
+.highlight-panel__copy { padding: 0 2px 2px; }
+.highlight-panel__name,
+.highlight-panel__description { margin: 0; }
+.highlight-panel__name {
+  font-size: 18px;
+  line-height: 1.05;
+  font-weight: 500;
+  margin-bottom: 7px;
+}
+.highlight-panel__description {
+  font-size: 13px;
+  line-height: 1.28;
+  color: #666;
+}
+.center-plane.is-highlight-open .subscribe-button { z-index: 10; }
+.center-plane.is-highlight-open .center-orbit-control--highlight { z-index: 30; }
+
+/* Highlight becomes the terminal visible satellite while its card is open.
+   Controls to its right retract completely and cannot capture hover/clicks. */
+.center-plane.is-highlight-open .center-orbit-control--orbit .satellite-button,
+.center-plane.is-highlight-open .center-orbit-control--spiral .satellite-button,
+.center-plane.is-highlight-open .center-orbit-control--submit .satellite-button {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translate(-50%, -50%) translate(0, 0) scale(.92) !important;
+}
+.center-plane.is-highlight-open .center-orbit-control--orbit,
+.center-plane.is-highlight-open .center-orbit-control--spiral,
+.center-plane.is-highlight-open .center-orbit-control--submit {
+  pointer-events: none !important;
+}
+
+.center-plane.is-highlight-open .center-orbit-control--highlight .satellite-button {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, -50%) translate(calc(var(--satellite-x) + var(--hover-x, 0px)), var(--hover-y, 0px)) scale(1);
+}
+@media (max-width: 900px) {
+  .highlight-panel { width: min(620px, 90vw, 67.5svh); padding: 14px; gap: 12px; }
+}
+
+
+/* --- Temporary inner hover ring -------------------------------------------
+   Hovering any of the six small controls immediately creates a temporary
+   ring inside the existing email / weekly rings. It uses the same circular
+   vocabulary, but at a softer opacity so it reads as contextual information
+   rather than a permanent orbit. */
+.hover-info-ring {
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 360ms cubic-bezier(.2,.72,.18,1);
+}
+.hover-info-ring.is-visible { opacity: 1; }
+.hover-info-ring__line {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.1;
+  stroke-opacity: .26;
+  vector-effect: non-scaling-stroke;
+}
+.hover-info-ring__text {
+  fill: var(--ink);
+  fill-opacity: .48;
+  font-family: var(--font-sans);
+  font-size: 25px;
+  font-weight: 400;
+  letter-spacing: -0.025em;
+}
+@media (max-width: 900px) {
+  .hover-info-ring__text { font-size: 23px; }
+}
+
+.solar-system.is-spiraling .center-orbit-control,
+.solar-system.is-spiraling .center-plane { pointer-events: none; }
+.solar-system.is-spiraling .hover-info-ring,
+.solar-system.is-submission-flattening .hover-info-ring,
+.solar-system.is-submission-mode .hover-info-ring { opacity: 0 !important; }
+.solar-system.is-spiraling.center-orbit-control { opacity: 0; transition: opacity 180ms ease; }
+
+/* Submit-event state. The entire orbital plane progressively turns edge-on. */
+/* --plane-scale-y is controlled only by the Submit Event / return transition. */
+.solar-system.is-submission-flattening .center-orbit-control,
+.solar-system.is-submission-mode.center-orbit-control { animation-play-state: paused !important; }
+.solar-system.is-submission-mode .orbit-svg,
+.solar-system.is-submission-mode .center-plane { opacity: 0; transition: scale 1900ms cubic-bezier(.55,.02,.22,1), opacity 560ms ease; }
+
+.event-submission {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(610px, 76vw);
+  /* The bottom edge of the first 58px row is pinned to the solar-system
+     centerline. This makes the first input rule occupy the exact same Y
+     coordinate as the edge-on orbital plane. */
+  transform: translate(-50%, -100%);
+  z-index: 35;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 360ms ease, top 520ms cubic-bezier(.2,.72,.18,1), transform 520ms cubic-bezier(.2,.72,.18,1);
+}
+.event-submission.is-visible { opacity: 1; pointer-events: auto; }
+
+/* Once the submission plane is active, the form becomes its own scrollable
+   review surface. Wheel/touch input is routed here instead of back into the
+   orbit camera, so entered values remain intact while the user reviews them. */
+.event-submission.is-reviewable {
+  top: 15svh;
+  transform: translateX(-50%);
+  max-height: 72svh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  padding: 0 8px 84px;
+  scroll-padding-block: 30px 120px;
+  -webkit-overflow-scrolling: touch;
+}
+.event-submission.is-reviewable::-webkit-scrollbar { width: 5px; }
+.event-submission.is-reviewable::-webkit-scrollbar-thumb { background: rgba(0,0,0,.16); border-radius: 999px; }
+.event-field {
+  position: relative;
+  width: 100%;
+  height: 58px;
+  display: flex;
+  align-items: flex-end;
+  transform: translateY(-58px);
+  opacity: 0;
+  transition: transform 720ms cubic-bezier(.22,.76,.24,1), opacity 420ms ease;
+}
+/* The first event-name row is pinned to the exact edge-on orbital centerline.
+   It never drops down. Its rule starts short + hairline-thin, directly over the
+   disappearing orbit, then grows into the full event input rule. */
+.event-field.is-first {
+  transform: translateY(0);
+  opacity: 1;
+  transition: none;
+}
+.event-field.is-first::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1.25px;
+  background: var(--line);
+  transform-origin: 50% 50%;
+  transform: scaleX(.32) scaleY(.18);
+  opacity: .72;
+  animation: event-line-becomes-input 760ms cubic-bezier(.2,.72,.18,1) forwards;
+  pointer-events: none;
+}
+@keyframes event-line-becomes-input {
+  0% { transform: scaleX(.32) scaleY(.18); opacity: .66; }
+  32% { transform: scaleX(.42) scaleY(.28); opacity: .82; }
+  100% { transform: scaleX(1) scaleY(1); opacity: 1; }
+}
+.event-field.is-emerged { transform: translateY(0); opacity: 1; }
+.event-field input, .event-field textarea {
+  width: 100%;
+  height: 46px;
+  border: 0;
+  border-bottom: 1.25px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  outline: none;
+  padding: 0 0 7px;
+  border-radius: 0;
+  font-size: clamp(1.15rem, 2.2vw, 1.55rem);
+  letter-spacing: -0.025em;
+  caret-color: var(--ink);
+}
+
+.description-wrap { position:relative; width:100%; }
+.event-field:has(.description-wrap) { height:auto; min-height:58px; align-items:flex-start; }
+.event-field textarea {
+  resize:none;
+  overflow:hidden;
+  min-height:46px;
+  height:46px;
+  padding-right:58px;
+  padding-top:7px;
+  line-height:1.35;
+  font-family:inherit;
+  box-sizing:border-box;
+}
+.event-field .is-inline-warning { color:#999 !important; }
+.event-field .is-inline-warning::placeholder { color:#999 !important; opacity:1; }
+.char-counter { position:absolute; right:-58px; bottom:14px; font-size:.62rem; color:#aaa; z-index:2; letter-spacing:0; white-space:nowrap; }
+.event-field.is-first input { border-bottom-color: transparent; }
+.event-field input::placeholder { color: #777; opacity: 1; }
+.event-field.is-complete input { color: #222; }
+.event-field[data-optional="true"]::after {
+  content: "encouraged";
+  position: absolute;
+  right: 0;
+  bottom: 13px;
+  font-size: .64rem;
+  color: #aaa;
+  pointer-events: none;
+}
+.event-field[data-optional="true"] input { padding-right: 5.8rem; }
+.event-submission.is-collapsing .event-field {
+  transform: translateY(calc(var(--field-index, 0) * -58px));
+  opacity: 0;
+  transition-duration: 560ms;
+}
+
+.event-field.is-removing {
+  transform: translateY(-24px);
+  opacity: 0;
+  transition-duration: 220ms;
+}
+
+.event-submit-wrap {
+  width: 100%;
+  height: 188px;
+  padding-top: 52px;
+  display: grid;
+  place-items: end center;
+  opacity: 0;
+  transform: translateY(-18px);
+  pointer-events: none;
+  transition: opacity 320ms ease, transform 520ms cubic-bezier(.2,.72,.18,1);
+}
+.event-submit-wrap.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.event-submit-button {
+  width: clamp(64px, 8.7vw, 108px);
+  aspect-ratio: 1;
+  border: 0;
+  border-radius: 50%;
+  background: var(--green);
+  color: #fff;
+  padding: 0;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transform-origin: center;
+  transition: transform 220ms cubic-bezier(.2,.72,.18,1), background 280ms var(--ease), opacity 180ms ease;
+  position: relative;
+  z-index: 60;
+}
+.event-submit-button:hover,
+.event-submit-button:focus-visible { transform: scale(1.15); outline: none; }
+.event-submit-button__svg { width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.event-submit-button__text {
+  fill: #fff;
+  font-family: var(--font-sans);
+  font-size: 13.667px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  opacity: 0;
+  transition: opacity 180ms var(--ease);
+}
+.event-submit-button:hover .event-submit-button__text,
+.event-submit-button:focus-visible .event-submit-button__text { opacity: 1; }
+.event-submit-button:hover .event-submit-button__svg,
+.event-submit-button:focus-visible .event-submit-button__svg { animation: button-spin 7s linear infinite; }
+
+/* During a successful event handoff the form button becomes viewport-fixed and
+   travels to the exact center occupied by Subscribe. */
+.event-submit-button.is-handoff {
+  position: fixed;
+  margin: 0;
+  transform: none;
+  transition: left 900ms cubic-bezier(.2,.78,.18,1),
+              top 900ms cubic-bezier(.2,.78,.18,1),
+              width 900ms cubic-bezier(.2,.78,.18,1),
+              background 360ms ease;
+  z-index: 100;
+}
+.event-submit-button.is-handoff .event-submit-button__text { opacity: 1; }
+.event-submit-button.is-handoff .event-submit-button__svg { animation: button-spin 11s linear infinite reverse; }
+
+.subscribe-button.is-event-submitted {
+  background: linear-gradient(145deg, #fff4bd 0%, #f4dda0 52%, #e8c977 100%);
+}
+.subscribe-button.is-event-submitted .subscribe-button__text {
+  opacity: 1;
+}
+.subscribe-button.is-event-submitted .subscribe-button__svg { animation: button-spin 11s linear infinite reverse; }
+
+/* Rings return as a soft fade after the successful event handoff. */
+.solar-system.is-event-success .orbit-svg {
+  opacity: 1;
+  transition: opacity 900ms ease;
+}
+.solar-system.is-event-success .center-plane {
+  opacity: 1;
+  transition: opacity 520ms ease 260ms;
+}
+
+@media (max-width: 600px) {
+  .satellite-button { width: 5.3%; min-width: 28px; }
+  .satellite-button__text { font-size: 10px; }
+  .event-submission { width: 82vw; }
+}
+
+
+/* Highlight layering fix: `.solar-system { isolation:isolate; }` makes the whole
+   interactive scene one stacking context. Lowering only `.brand` was therefore
+   not enough—the masthead could still sit above that entire context. While the
+   highlight is open, explicitly lift the viewport stacking context above the
+   masthead. The translucent card then genuinely composites over "placeholder",
+   while the Highlight control remains above the card inside the viewport. */
+body.is-highlight-open .brand {
+  z-index: 10;
+}
+body.is-highlight-open .viewport {
+  z-index: 11;
+}
+
+
+/* --- Feeling lost? ------------------------------------------------------ */
+.feeling-lost-link {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  z-index: 42;
+  border: 0;
+  background: transparent;
+  padding: 2px 1px;
+  color: #777;
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 400;
+  letter-spacing: .025em;
+  text-decoration-line: underline;
+  text-decoration-thickness: .5px;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 320ms ease, color 180ms ease;
+}
+.feeling-lost-link.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+.feeling-lost-link:hover,
+.feeling-lost-link:focus-visible { color: #222; }
+
+
+.feeling-lost-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 39;
+  background: rgba(255,255,255,.40);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 240ms ease;
+}
+.feeling-lost-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.feeling-lost-panel {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: min(660px, 88vw);
+  max-height: min(76svh, 720px);
+  transform: translate(-50%, -50%) scale(.975);
+  z-index: 40;
+  background: rgba(255,255,255,.95);
+  opacity: 0;
+  pointer-events: none;
+  overflow: auto;
+  padding: 34px 38px 38px;
+  transition: opacity 240ms ease, transform 380ms cubic-bezier(.2,.72,.18,1);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  scrollbar-width: thin;
+}
+.feeling-lost-panel.is-open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, -50%) scale(1);
+}
+.feeling-lost-panel__inner {
+  display: grid;
+  gap: 28px;
+}
+.feeling-lost-panel__section {
+  display: grid;
+  gap: 8px;
+}
+.feeling-lost-panel h2,
+.feeling-lost-panel p,
+.feeling-lost-panel dl,
+.feeling-lost-panel dt,
+.feeling-lost-panel dd { margin: 0; }
+.feeling-lost-panel h2 {
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 500;
+  letter-spacing: .01em;
+}
+.feeling-lost-panel p,
+.feeling-lost-panel dt,
+.feeling-lost-panel dd {
+  font-size: 13px;
+  line-height: 1.42;
+}
+.feeling-lost-panel p { max-width: 58ch; }
+.feeling-lost-panel__email { white-space: nowrap; }
+.feeling-lost-panel__faq dl {
+  display: grid;
+  gap: 14px;
+}
+.feeling-lost-panel__faq dl > div {
+  display: grid;
+  grid-template-columns: minmax(135px, .9fr) minmax(0, 1.8fr);
+  gap: 18px;
+  padding-top: 10px;
+  border-top: .5px solid rgba(0,0,0,.18);
+}
+.feeling-lost-panel dt { font-weight: 500; }
+.feeling-lost-panel dd { color: #666; }
+
+/* The help card occupies the same calm overlay layer as Highlight. Keep the
+   masthead and green subscribe circle behind it while the bottom link remains
+   available as the close toggle. */
+body.is-feeling-lost-open {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+body.is-feeling-lost-open .brand { z-index: 11; }
+body.is-feeling-lost-open .viewport { z-index: 30; }
+body.is-feeling-lost-open .center-plane { z-index: 10; }
+body.is-feeling-lost-open .feeling-lost-backdrop { z-index: 39; }
+body.is-feeling-lost-open .feeling-lost-panel { z-index: 40; }
+body.is-feeling-lost-open .feeling-lost-link { z-index: 45; }
+body.is-feeling-lost-open .feeling-lost-panel {
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+
+@media (max-width: 700px) {
+  .feeling-lost-link { bottom: 16px; }
+  .feeling-lost-panel {
+    width: min(92vw, 660px);
+    max-height: 78svh;
+    padding: 26px 24px 30px;
+  }
+  .feeling-lost-panel__faq dl > div {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
+
+
+/* Submission escape hatch: keep the fixed masthead above the event plane even
+   if the user entered it while another overlay had previously changed stacking. */
+body.is-submission-mode .brand {
+  z-index: 140 !important;
+  pointer-events: auto !important;
+}
+
+/* Submit-event contact privacy preference. This is a compact, accessible
+   checkbox row that appears immediately after link/contact. */
+.event-field--checkbox {
+  height: 52px;
+  min-height: 52px;
+  align-items: center;
+}
+.event-private-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  cursor: pointer;
+  user-select: none;
+  font-size: .78rem;
+  line-height: 1;
+  color: var(--ink);
+}
+.event-private-toggle input {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+.event-private-toggle__box {
+  width: 13px;
+  height: 13px;
+  box-sizing: border-box;
+  border: 1px solid var(--ink);
+  background: #fff;
+  flex: 0 0 auto;
+  transition: background 120ms ease;
+}
+.event-private-toggle input:checked + .event-private-toggle__box {
+  background: var(--ink);
+}
+.event-private-toggle input:focus-visible + .event-private-toggle__box {
+  outline: 1px solid var(--ink);
+  outline-offset: 3px;
+}
+.event-private-toggle__label {
+  transform: translateY(-.5px);
+}

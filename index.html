@@ -1,46 +1,151 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Newsletter subscription page">
-  <title>Newsletter</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>placeholder — hover menu follows subscribe drift</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <main class="page">
-    <section class="hero" aria-labelledby="page-title">
-      <h1 id="page-title">placeholder</h1>
+  <main class="page-shell">
+    <button id="brandButton" class="brand" type="button" aria-label="Return to orbit">placeholder</button>
 
-      <p class="intro">
-        placeholder&nbsp;&nbsp; text&nbsp;&nbsp; placeholder&nbsp;&nbsp; text&nbsp;&nbsp;
-        placeholder&nbsp;&nbsp; text&nbsp;&nbsp; placeholder&nbsp;&nbsp; text
-        placeholder&nbsp;&nbsp; text&nbsp;&nbsp; placeholder&nbsp;&nbsp; text&nbsp;&nbsp;
-        placeholder&nbsp;&nbsp; text&nbsp;&nbsp; placeholder&nbsp;&nbsp; text
-        placeholder&nbsp;&nbsp; text&nbsp;&nbsp; placeholder&nbsp;&nbsp; text&nbsp;&nbsp;
-        placeholder&nbsp;&nbsp; text&nbsp;&nbsp; placeholder&nbsp;&nbsp; text
-        placeholder&nbsp;&nbsp; text&nbsp;&nbsp; placeholder&nbsp;&nbsp; text&nbsp;&nbsp;
-        placeholder&nbsp;&nbsp; text&nbsp;&nbsp; placeholder&nbsp;&nbsp; text
-        placeholder&nbsp;&nbsp; text&nbsp;&nbsp; placeholder&nbsp;&nbsp; text&nbsp;&nbsp;
-        placeholder&nbsp;&nbsp; text&nbsp;&nbsp; placeholder&nbsp;&nbsp; text
-      </p>
+    <section class="viewport" aria-label="Placeholder newsletter interactive orbit">
+      <div id="solarSystem" class="solar-system">
+        <svg id="orbitSvg" class="orbit-svg" viewBox="0 0 800 800" role="img" aria-labelledby="orbitTitle orbitDesc">
+          <title id="orbitTitle">Placeholder newsletter solar system</title>
+          <desc id="orbitDesc">A set of independently rotating circular information rings. Additional About and Contact rings can be added during the visit. The Spiral control opens each accumulated ring by roughly half its circumference, then directly reshapes those surviving arcs into one continuous spiral without a separate connector or flip phase. Added information is deleted character by character while the corresponding inner length of the spiral is removed; the original weekly and email text remain attached and resolve back into the original two rings.</desc>
+          <g id="cameraLayer">
+            <g id="ringsLayer"></g>
+            <g id="hoverInfoRing" class="hover-info-ring" aria-hidden="true">
+              <g class="hover-info-ring__motion">
+                <g class="hover-info-ring__line-motion">
+                  <circle class="hover-info-ring__line" cx="407" cy="394" r="92"></circle>
+                  <defs>
+                    <path id="hoverInfoRingPath" d="M 291 400 A 109 109 0 1 1 509 400 A 109 109 0 1 1 291 400"></path>
+                  </defs>
+                  <text class="hover-info-ring__text">
+                    <textPath id="hoverInfoRingText" href="#hoverInfoRingPath" startOffset="25%" text-anchor="middle">about</textPath>
+                  </text>
+                </g>
+              </g>
+            </g>
+          </g>
+        </svg>
 
-      <form id="subscribe-form" class="subscribe-form" novalidate>
-        <label class="sr-only" for="email">Email address</label>
         <input
-          id="email"
-          name="email"
+          id="emailInput"
+          class="email-capture"
           type="email"
+          inputmode="email"
           autocomplete="email"
-          placeholder="email"
-          required
-        >
-        <button type="submit">subscribe</button>
-        <p id="form-message" class="form-message" role="status" aria-live="polite"></p>
-      </form>
+          autocapitalize="none"
+          spellcheck="false"
+          aria-label="Email address"
+        />
+
+        <div id="centerPlane" class="center-plane">
+          <button id="subscribeButton" class="subscribe-button" type="button" aria-label="Subscribe">
+            <svg class="subscribe-button__svg" viewBox="0 0 100 100" aria-hidden="true">
+              <defs>
+                <path id="subscribeLabelPath" d="M 12.7 71 A 42 42 0 0 0 87.3 71" />
+              </defs>
+              <text class="subscribe-button__text">
+                <textPath id="subscribeButtonLabel" href="#subscribeLabelPath" startOffset="50%" text-anchor="middle">subscribe</textPath>
+              </text>
+            </svg>
+          </button>
+
+          <div class="center-orbit-control center-orbit-control--about" data-control="about">
+            <button id="aboutButton" class="satellite-button satellite-button--about" type="button" aria-label="About">
+              <svg class="satellite-button__svg" viewBox="0 0 100 100" aria-hidden="true"><defs><path id="aboutLabelPath" d="M 12.7 71 A 42 42 0 0 0 87.3 71" /></defs><text class="satellite-button__text"><textPath href="#aboutLabelPath" startOffset="50%" text-anchor="middle">about</textPath></text></svg>
+            </button>
+          </div>
+
+          <div class="center-orbit-control center-orbit-control--contact" data-control="contact">
+            <button id="contactButton" class="satellite-button satellite-button--contact" type="button" aria-label="Contact">
+              <svg class="satellite-button__svg" viewBox="0 0 100 100" aria-hidden="true"><defs><path id="contactLabelPath" d="M 12.7 71 A 42 42 0 0 0 87.3 71" /></defs><text class="satellite-button__text"><textPath href="#contactLabelPath" startOffset="50%" text-anchor="middle">contact</textPath></text></svg>
+            </button>
+          </div>
+
+          <div class="center-orbit-control center-orbit-control--highlight" data-control="highlight">
+            <button id="highlightButton" class="satellite-button satellite-button--highlight" type="button" aria-label="Open highlight" aria-expanded="false">
+              <svg class="satellite-button__svg" viewBox="0 0 100 100" aria-hidden="true"><defs><path id="highlightLabelPath" d="M 12.7 71 A 42 42 0 0 0 87.3 71" /></defs><text class="satellite-button__text"><textPath href="#highlightLabelPath" startOffset="50%" text-anchor="middle">highlight</textPath></text></svg>
+            </button>
+          </div>
+
+          <div class="center-orbit-control center-orbit-control--orbit" data-control="orbit">
+            <button id="orbitToggleButton" class="satellite-button satellite-button--orbit" type="button" aria-label="Pause ring orbit" aria-pressed="false">
+              <svg class="satellite-button__svg" viewBox="0 0 100 100" aria-hidden="true"><defs><path id="orbitLabelPath" d="M 12.7 71 A 42 42 0 0 0 87.3 71" /></defs><text class="satellite-button__text"><textPath href="#orbitLabelPath" startOffset="50%" text-anchor="middle">orbit</textPath></text></svg>
+            </button>
+          </div>
+
+          <div class="center-orbit-control center-orbit-control--spiral" data-control="spiral">
+            <button id="spiralButton" class="satellite-button satellite-button--spiral" type="button" aria-label="Spiral reset">
+              <svg class="satellite-button__svg" viewBox="0 0 100 100" aria-hidden="true"><defs><path id="spiralControlLabelPath" d="M 12.7 71 A 42 42 0 0 0 87.3 71" /></defs><text class="satellite-button__text"><textPath href="#spiralControlLabelPath" startOffset="50%" text-anchor="middle">spiral</textPath></text></svg>
+            </button>
+          </div>
+
+          <div class="center-orbit-control center-orbit-control--submit" data-control="submit">
+            <button id="submitEventButton" class="satellite-button satellite-button--submit" type="button" aria-label="Submit an event">
+              <svg class="satellite-button__svg" viewBox="0 0 100 100" aria-hidden="true"><defs><path id="submitLabelPath" d="M 12.7 71 A 42 42 0 0 0 87.3 71" /></defs><text class="satellite-button__text"><textPath href="#submitLabelPath" startOffset="50%" text-anchor="middle">submit event</textPath></text></svg>
+            </button>
+          </div>
+
+          <aside id="highlightPanel" class="highlight-panel" aria-hidden="true" aria-label="Highlight">
+            <div class="highlight-panel__photo" role="img" aria-label="Highlight photo placeholder">photo</div>
+            <div class="highlight-panel__copy">
+              <p class="highlight-panel__name">name</p>
+              <p class="highlight-panel__description">brief description</p>
+            </div>
+          </aside>
+        </div>
+
+
+        <button id="feelingLostLink" class="feeling-lost-link" type="button" aria-controls="feelingLostPanel" aria-expanded="false">feeling lost?</button>
+
+        <div id="feelingLostBackdrop" class="feeling-lost-backdrop" aria-hidden="true"></div>
+
+        <aside id="feelingLostPanel" class="feeling-lost-panel" aria-hidden="true" aria-label="Placeholder guide">
+          <div class="feeling-lost-panel__inner">
+            <section class="feeling-lost-panel__section">
+              <h2>about</h2>
+              <p>placeholder is a weekly field note for finding something worth leaving the house for.</p>
+              <p>it is a small edit of exhibitions, openings, performances, food, music, and odd things happening around san francisco — made for curious people who want a useful list without feeds, algorithms, spam, or fluff.</p>
+            </section>
+
+            <section class="feeling-lost-panel__section">
+              <h2>contact</h2>
+              <p>send events, ideas, corrections, local tips, collaborations, questions, or a simple hello to <span class="feeling-lost-panel__email">events@placeholdersf.com</span>.</p>
+            </section>
+
+            <section class="feeling-lost-panel__section feeling-lost-panel__faq">
+              <h2>faq</h2>
+              <dl>
+                <div><dt>what is placeholder?</dt><dd>a weekly san francisco events calendar, edited down to things that feel worth noticing.</dd></div>
+                <div><dt>how do i subscribe?</dt><dd>click the email ring, type your address, then click the green subscribe circle.</dd></div>
+                <div><dt>how do i submit an event?</dt><dd>open the center controls and choose submit event.</dd></div>
+                <div><dt>can i send a correction or recommendation?</dt><dd>yes — email events@placeholdersf.com.</dd></div>
+                <div><dt>what does orbit do?</dt><dd>it pauses or resumes the motion of the rings without changing their positions.</dd></div>
+                <div><dt>what does spiral do?</dt><dd>it gathers the current ring content inward and resets the system back to the original two rings.</dd></div>
+              </dl>
+            </section>
+          </div>
+        </aside>
+
+        <form id="eventSubmission" class="event-submission" autocomplete="off" aria-label="Submit an event"></form>
+      </div>
+
+      <p id="statusMessage" class="status-message" aria-live="polite"></p>
     </section>
   </main>
 
-  <script src="script.js"></script>
+  <script src="js/orbit-core.js"></script>
+  <script src="js/ring-drag.js"></script>
+  <script src="js/spiral-reset.js"></script>
+  <script src="js/center-menu.js"></script>
+  <script src="js/event-form.js"></script>
+  <script src="js/camera.js"></script>
 </body>
 </html>
