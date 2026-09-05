@@ -1,13 +1,14 @@
 // ---------------------------------------------------------------------------
 // EDITABLE CONTENT FILES
 //
-// GitHub Pages serves the JSON/photo files in /content as ordinary static
-// assets. Updating those files in the repository updates the corresponding
-// site panels without changing index.html or the interaction code.
+// Highlight + Feeling Lost are loaded from /content so those panels can be
+// updated without editing index.html. Each read uses a genuinely unique URL
+// and browser no-cache directives. We also refresh when the page is restored
+// from browser history and whenever either panel is opened, which avoids stale
+// text from the browser back/forward cache as well as ordinary HTTP caching.
 // ---------------------------------------------------------------------------
 
 function hashContent(text) {
-  // Small deterministic hash: when content.json changes, asset URLs change too.
   let hash = 2166136261;
   for (let i = 0; i < text.length; i += 1) {
     hash ^= text.charCodeAt(i);
@@ -16,15 +17,27 @@ function hashContent(text) {
   return (hash >>> 0).toString(36);
 }
 
+function freshRequestToken() {
+  if (globalThis.crypto && typeof globalThis.crypto.randomUUID === "function") {
+    return globalThis.crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
 async function fetchSiteContent(path) {
-  // Bust both browser and GitHub Pages/CDN caches so edits to content.json
-  // show up as soon as the new deployment is available.
-  const separator = path.includes("?") ? "&" : "?";
-  const url = `${path}${separator}v=${Date.now()}`;
-  const response = await fetch(url, {
+  const url = new URL(path, window.location.href);
+  url.searchParams.set("refresh", freshRequestToken());
+
+  const response = await fetch(url.href, {
+    method: "GET",
     cache: "no-store",
-    headers: { "Cache-Control": "no-cache" }
+    credentials: "same-origin",
+    headers: {
+      "Cache-Control": "no-cache, no-store, max-age=0, must-revalidate",
+      "Pragma": "no-cache"
+    }
   });
+
   if (!response.ok) throw new Error(`Could not load ${path}: ${response.status}`);
   const text = await response.text();
   return { data: JSON.parse(text), version: hashContent(text) };
@@ -38,20 +51,24 @@ async function loadHighlightContent() {
 
   try {
     const { data: content, version } = await fetchSiteContent("./content/highlight/content.json");
-    if (typeof content.name === "string") name.textContent = content.name;
-    if (typeof content.description === "string") description.textContent = content.description;
+
+    // Replace the DOM text nodes every time fresh JSON is loaded. This avoids
+    // retaining stale inline/fallback text when a page is restored from bfcache.
+    if (typeof content.name === "string") {
+      name.replaceChildren(document.createTextNode(content.name));
+    }
+    if (typeof content.description === "string") {
+      description.replaceChildren(document.createTextNode(content.description));
+    }
     if (typeof content.photo_alt === "string") photo.alt = content.photo_alt;
 
-    // The highlight image filename lives in content.json so it can be changed
-    // without touching HTML. Add a cache-busting query so replacing an image
-    // with the same filename is visible immediately after GitHub Pages updates.
     const photoFile = typeof content.photo === "string" && content.photo.trim()
       ? content.photo.trim()
       : "photo.jpg";
-    // Tie the photo URL to the freshly fetched JSON contents and this page load.
-    // The JSON hash changes whenever highlight content changes; the timestamp also
-    // guarantees a replaced same-name photo is re-requested on a new page load.
-    photo.src = `./content/highlight/${encodeURIComponent(photoFile)}?content=${version}&load=${Date.now()}`;
+    const photoUrl = new URL(`./content/highlight/${photoFile}`, window.location.href);
+    photoUrl.searchParams.set("content", version);
+    photoUrl.searchParams.set("refresh", freshRequestToken());
+    photo.src = photoUrl.href;
   } catch (error) {
     console.warn("Highlight content file was not loaded; using inline fallback copy.", error);
   }
@@ -121,5 +138,24 @@ async function loadFeelingLostContent() {
   }
 }
 
-loadHighlightContent();
-loadFeelingLostContent();
+function refreshEditableContent() {
+  loadHighlightContent();
+  loadFeelingLostContent();
+}
+
+// Initial load.
+refreshEditableContent();
+
+// A normal reload and a browser back/forward restore both receive a fresh copy.
+window.addEventListener("pageshow", refreshEditableContent);
+
+// If the tab has been sitting open while GitHub Pages deploys new content,
+// returning to it refreshes the editable panels too.
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) refreshEditableContent();
+});
+
+// Refresh immediately before opening either editable panel.
+document.getElementById("highlightButton")?.addEventListener("click", loadHighlightContent, { capture: true });
+document.getElementById("mobileHighlightLink")?.addEventListener("click", loadHighlightContent, { capture: true });
+document.getElementById("feelingLostLink")?.addEventListener("click", loadFeelingLostContent, { capture: true });

@@ -254,6 +254,39 @@ function getEmailRing() {
   return rings.find(ring => ring.kind === "email");
 }
 
+function getSubscribeConfirmationRing() {
+  return rings.find(ring => ring.kind === "subscribe-confirm");
+}
+
+function removeSubscribeConfirmationRing() {
+  const ring = getSubscribeConfirmationRing();
+  if (!ring) return;
+  const index = rings.indexOf(ring);
+  if (index >= 0) rings.splice(index, 1);
+  ring.dom?.wrapper?.remove();
+  layoutRings();
+}
+
+function showSubscribeConfirmationRing() {
+  if (getSubscribeConfirmationRing()) return;
+
+  const ring = makeRing({
+    id: "subscribe-confirm",
+    kind: "subscribe-confirm",
+    text: "check your email",
+    lineDuration: 24,
+    textDuration: 34,
+    textStart: 8,
+    lineOffsetX: 0,
+    lineOffsetY: 0
+  });
+
+  createRingDom(ring);
+  ring.currentRadius = 74;
+  rings.unshift(ring);
+  layoutRings();
+}
+
 let emailPromptText = "";
 
 function renderEmailText(displayed, showCaret = false) {
@@ -308,6 +341,7 @@ emailInput.addEventListener("blur", () => {
 
 emailInput.addEventListener("input", () => {
   subscribed = false;
+  removeSubscribeConfirmationRing();
   emailPromptText = "";
   subscribeButton.classList.remove("is-subscribed", "is-error");
   subscribeButtonLabel.textContent = "subscribe";
@@ -359,10 +393,12 @@ subscribeButton.addEventListener("click", async () => {
     subscribeButtonLabel.textContent = "subscribed";
     if (subscribeLabelPath) subscribeLabelPath.setAttribute("d", "M 12.7 71 A 42 42 0 0 0 87.3 71");
     emailRing.dom.wrapper.classList.add("is-subscribed");
+    showSubscribeConfirmationRing();
     emailInput.blur();
     setStatus("");
   } catch (error) {
     subscribed = false;
+    removeSubscribeConfirmationRing();
     subscribeButton.classList.remove("is-subscribed");
     subscribeButton.classList.add("is-error");
     subscribeButtonLabel.textContent = "try again";

@@ -132,6 +132,8 @@ button { -webkit-tap-highlight-color: transparent; }
 .logical-ring[data-kind="email"] .path-hit { font-size: 45px; }
 .logical-ring[data-kind="email"] .path-copy { fill: var(--muted); }
 .logical-ring.is-subscribed .path-copy { fill: var(--green-active); }
+.logical-ring[data-kind="subscribe-confirm"] .ring-line { stroke: var(--green-active); }
+.logical-ring[data-kind="subscribe-confirm"] .path-copy { fill: var(--green-active); }
 
 .email-box-caret {
   font-size: 1em;

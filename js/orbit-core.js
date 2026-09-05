@@ -8,7 +8,7 @@ const NS = "http://www.w3.org/2000/svg";
 
 // Paste the already-deployed public Supabase subscribe Edge Function URL here.
 // Example: https://PROJECT_REF.supabase.co/functions/v1/subscribe
-const SUBSCRIBE_ENDPOINT = "";
+const SUBSCRIBE_ENDPOINT = "https://xqlnypsmfbczrytksded.supabase.co/functions/v1/subscribe";
 const ORBIT_CENTER = 400;
 const cameraLayer = document.getElementById("cameraLayer");
 const ringsLayer = document.getElementById("ringsLayer");
