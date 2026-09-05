@@ -317,7 +317,7 @@ emailInput.addEventListener("input", () => {
   setStatus("");
 });
 
-subscribeButton.addEventListener("click", () => {
+subscribeButton.addEventListener("click", async () => {
   const email = emailInput.value.trim();
   const emailRing = getEmailRing();
 
@@ -334,16 +334,51 @@ subscribeButton.addEventListener("click", () => {
     return;
   }
 
-  // Visual prototype only — Supabase is intentionally not connected yet.
-  subscribed = true;
-  subscribeButton.classList.remove("is-error");
-  subscribeButton.classList.add("is-subscribed");
-  subscribeButtonLabel.textContent = "subscribed";
-  if (subscribeLabelPath) subscribeLabelPath.setAttribute("d", "M 12.7 71 A 42 42 0 0 0 87.3 71");
-  emailRing.dom.wrapper.classList.add("is-subscribed");
-  emailInput.blur();
+  if (!SUBSCRIBE_ENDPOINT) {
+    subscribeButton.classList.add("is-error");
+    subscribeButtonLabel.textContent = "not connected";
+    setStatus("Subscribe endpoint is not configured yet.");
+    return;
+  }
+
+  subscribeButton.disabled = true;
   setStatus("");
+  try {
+    const response = await fetch(SUBSCRIBE_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email })
+    });
+    let payload = null;
+    try { payload = await response.json(); } catch (_) {}
+    if (!response.ok) throw new Error(payload?.error || payload?.message || "Subscription failed");
+
+    subscribed = true;
+    subscribeButton.classList.remove("is-error");
+    subscribeButton.classList.add("is-subscribed");
+    subscribeButtonLabel.textContent = "subscribed";
+    if (subscribeLabelPath) subscribeLabelPath.setAttribute("d", "M 12.7 71 A 42 42 0 0 0 87.3 71");
+    emailRing.dom.wrapper.classList.add("is-subscribed");
+    emailInput.blur();
+    setStatus("");
+  } catch (error) {
+    subscribed = false;
+    subscribeButton.classList.remove("is-subscribed");
+    subscribeButton.classList.add("is-error");
+    subscribeButtonLabel.textContent = "try again";
+    setStatus(error?.message || "Could not subscribe. Please try again.");
+  } finally {
+    subscribeButton.disabled = false;
+  }
 });
 
 syncEmailDisplay();
 
+
+
+emailInput.addEventListener("keydown", event => {
+  if (event.key === "Enter" && window.matchMedia("(max-width: 700px)").matches) {
+    event.preventDefault();
+    subscribeButton.click();
+  }
+});

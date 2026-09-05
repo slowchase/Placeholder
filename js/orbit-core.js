@@ -5,6 +5,10 @@
 // share these bindings. Keep cross-system helpers small and behavior-neutral.
 // ---------------------------------------------------------------------------
 const NS = "http://www.w3.org/2000/svg";
+
+// Paste the already-deployed public Supabase subscribe Edge Function URL here.
+// Example: https://PROJECT_REF.supabase.co/functions/v1/subscribe
+const SUBSCRIBE_ENDPOINT = "";
 const ORBIT_CENTER = 400;
 const cameraLayer = document.getElementById("cameraLayer");
 const ringsLayer = document.getElementById("ringsLayer");
@@ -18,6 +22,7 @@ const statusMessage = document.getElementById("statusMessage");
 const aboutButton = document.getElementById("aboutButton");
 const contactButton = document.getElementById("contactButton");
 const highlightButton = document.getElementById("highlightButton");
+const mobileHighlightLink = document.getElementById("mobileHighlightLink");
 const orbitToggleButton = document.getElementById("orbitToggleButton");
 const highlightPanel = document.getElementById("highlightPanel");
 const feelingLostLink = document.getElementById("feelingLostLink");

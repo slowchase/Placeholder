@@ -969,3 +969,70 @@ body.is-submission-mode .brand {
 .event-private-toggle__label {
   transform: translateY(-.5px);
 }
+
+
+/* Mobile-only simplification: keep Subscribe, remove the six satellite circles,
+   expose Highlight as a quiet bottom link, and provide a static submit gesture cue. */
+.mobile-bottom-actions, .mobile-highlight-link, .mobile-submit-hint { display: none; }
+.logical-ring[data-kind="event-confirm"] .ring-line { stroke: #e8c977; }
+.logical-ring[data-kind="event-confirm"] .path-copy { fill: #c7a64b; }
+
+@media (max-width: 700px) {
+  .center-orbit-control { display: none !important; }
+  .hover-info-ring { display: none !important; }
+
+  .mobile-bottom-actions {
+    display: flex;
+    position: fixed;
+    left: 50%;
+    bottom: 14px;
+    transform: translateX(-50%);
+    z-index: 42;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    width: max-content;
+    pointer-events: none;
+  }
+  .mobile-bottom-link,
+  .mobile-bottom-actions .feeling-lost-link {
+    position: static;
+    left: auto;
+    bottom: auto;
+    transform: none;
+    z-index: auto;
+  }
+  .mobile-highlight-link {
+    display: block;
+    border: 0;
+    background: transparent;
+    padding: 2px 1px;
+    color: #777;
+    font: inherit;
+    font-size: 10px;
+    line-height: 1;
+    font-weight: 400;
+    letter-spacing: .025em;
+    text-decoration-line: underline;
+    text-decoration-thickness: .5px;
+    text-underline-offset: 2px;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+  .mobile-bottom-actions .feeling-lost-link {
+    display: block;
+    pointer-events: none;
+  }
+  .mobile-bottom-actions .feeling-lost-link.is-visible { pointer-events: auto; }
+  .mobile-submit-hint {
+    display: block;
+    margin: 1px 0 0;
+    color: #777;
+    font-size: 10px;
+    line-height: 1;
+    font-weight: 400;
+    letter-spacing: .025em;
+    text-decoration: none;
+    pointer-events: none;
+  }
+}

@@ -1,5 +1,13 @@
 function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
+function hardenMobileTextInput(input) {
+  if (!input || !window.matchMedia("(max-width: 700px)").matches) return;
+  input.setAttribute("autocomplete", "off");
+  input.setAttribute("autocorrect", "off");
+  input.setAttribute("autocapitalize", "off");
+  input.setAttribute("spellcheck", "false");
+}
+
 async function typePlaceholder(input, text, token) {
   input.placeholder = "";
   await sleep(150);
@@ -172,6 +180,7 @@ function createEventField(index) {
     const input=document.createElement("input"); input.type=config.type; input.name=config.key; input.setAttribute("aria-label",config.label+(config.optional?" encouraged":"")); input.autocomplete="off"; input.spellcheck=config.key==="event-name"||config.key==="location"; row.append(input); primary=input;
     addBackspaceBehavior(input,index,row); input.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();advanceEventField(index,config,row)}});
   }
+  if (primary && config.type !== "checkbox") hardenMobileTextInput(primary);
   if(eventSubmitWrap)eventSubmission.insertBefore(row,eventSubmitWrap);else eventSubmission.appendChild(row);
   if(index!==0)requestAnimationFrame(()=>requestAnimationFrame(()=>row.classList.add("is-emerged")));
   if(config.type!=="textarea" && config.type!=="checkbox"){ const token=++typingToken; if(index===0)setTimeout(()=>{if(token===typingToken&&submissionActive)typePlaceholder(primary,config.label,token)},520); else typePlaceholder(primary,config.label,token); }
@@ -230,6 +239,25 @@ function validateEventForm() {
   if(firstMissing){firstMissing.focus();return false;} return true;
 }
 
+function addMobileEventSubmittedRing() {
+  if (!window.matchMedia("(max-width: 700px)").matches) return;
+  if (rings.some(ring => ring.kind === "event-confirm")) return;
+  const ring = makeRing({
+    id: `event-confirm-${Date.now()}`,
+    kind: "event-confirm",
+    text: "event submitted!",
+    lineDuration: 28,
+    textDuration: 36,
+    textStart: 8,
+    lineOffsetX: 8,
+    lineOffsetY: -6
+  });
+  createRingDom(ring);
+  ring.currentRadius = 74;
+  rings.unshift(ring);
+  layoutRings();
+}
+
 function submitEventForm() {
   if (eventSubmitting || !eventSubmitButton || !validateEventForm()) return;
   eventSubmitting = true;
@@ -275,6 +303,7 @@ function submitEventForm() {
     subscribeButton.classList.add("is-event-submitted");
     subscribeButtonLabel.textContent = "event submitted!";
     if (subscribeLabelPath) subscribeLabelPath.setAttribute("d", "M 8 50 A 42 42 0 0 0 92 50");
+    addMobileEventSubmittedRing();
     setSubmissionControlsDisabled(false);
     centerPlane.classList.remove("is-menu-open");
 

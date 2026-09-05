@@ -174,6 +174,10 @@ function setHighlightOpen(open) {
   highlightPanel.setAttribute("aria-hidden", open ? "false" : "true");
   highlightButton.setAttribute("aria-expanded", open ? "true" : "false");
   highlightButton.setAttribute("aria-label", open ? "Close highlight" : "Open highlight");
+  if (mobileHighlightLink) {
+    mobileHighlightLink.setAttribute("aria-expanded", open ? "true" : "false");
+    mobileHighlightLink.setAttribute("aria-label", open ? "Close highlight" : "Open highlight");
+  }
   centerPlane.classList.toggle("is-highlight-open", open);
   document.body.classList.toggle("is-highlight-open", open);
 }
@@ -183,6 +187,13 @@ if (highlightButton) {
     if (typeof setFeelingLostOpen === "function") setFeelingLostOpen(false);
     setHighlightOpen(!highlightPanel.classList.contains("is-open"));
     openCenterMenu();
+  });
+}
+if (mobileHighlightLink) {
+  mobileHighlightLink.addEventListener("click", event => {
+    event.stopPropagation();
+    if (typeof setFeelingLostOpen === "function") setFeelingLostOpen(false);
+    setHighlightOpen(!highlightPanel.classList.contains("is-open"));
   });
 }
 
