@@ -6,6 +6,16 @@
 // site panels without changing index.html or the interaction code.
 // ---------------------------------------------------------------------------
 
+function hashContent(text) {
+  // Small deterministic hash: when content.json changes, asset URLs change too.
+  let hash = 2166136261;
+  for (let i = 0; i < text.length; i += 1) {
+    hash ^= text.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(36);
+}
+
 async function fetchSiteContent(path) {
   // Bust both browser and GitHub Pages/CDN caches so edits to content.json
   // show up as soon as the new deployment is available.
@@ -16,7 +26,8 @@ async function fetchSiteContent(path) {
     headers: { "Cache-Control": "no-cache" }
   });
   if (!response.ok) throw new Error(`Could not load ${path}: ${response.status}`);
-  return response.json();
+  const text = await response.text();
+  return { data: JSON.parse(text), version: hashContent(text) };
 }
 
 async function loadHighlightContent() {
@@ -26,7 +37,7 @@ async function loadHighlightContent() {
   if (!name || !description || !photo) return;
 
   try {
-    const content = await fetchSiteContent("./content/highlight/content.json");
+    const { data: content, version } = await fetchSiteContent("./content/highlight/content.json");
     if (typeof content.name === "string") name.textContent = content.name;
     if (typeof content.description === "string") description.textContent = content.description;
     if (typeof content.photo_alt === "string") photo.alt = content.photo_alt;
@@ -37,7 +48,10 @@ async function loadHighlightContent() {
     const photoFile = typeof content.photo === "string" && content.photo.trim()
       ? content.photo.trim()
       : "photo.jpg";
-    photo.src = `./content/highlight/${encodeURIComponent(photoFile)}?v=${Date.now()}`;
+    // Tie the photo URL to the freshly fetched JSON contents and this page load.
+    // The JSON hash changes whenever highlight content changes; the timestamp also
+    // guarantees a replaced same-name photo is re-requested on a new page load.
+    photo.src = `./content/highlight/${encodeURIComponent(photoFile)}?content=${version}&load=${Date.now()}`;
   } catch (error) {
     console.warn("Highlight content file was not loaded; using inline fallback copy.", error);
   }
@@ -58,7 +72,7 @@ async function loadFeelingLostContent() {
   if (!inner) return;
 
   try {
-    const content = await fetchSiteContent("./content/feeling-lost/content.json");
+    const { data: content } = await fetchSiteContent("./content/feeling-lost/content.json");
     const fragment = document.createDocumentFragment();
 
     if (content.about && Array.isArray(content.about.paragraphs)) {
