@@ -975,7 +975,8 @@ body.is-submission-mode .brand {
 
 /* Mobile-only simplification: keep Subscribe, remove the six satellite circles,
    expose Highlight as a quiet bottom link, and provide a static submit gesture cue. */
-.mobile-bottom-actions, .mobile-highlight-link, .mobile-submit-hint { display: none; }
+.mobile-bottom-actions { display: contents; }
+.mobile-highlight-link, .mobile-submit-hint { display: none; }
 .logical-ring[data-kind="event-confirm"] .ring-line { stroke: #e8c977; }
 .logical-ring[data-kind="event-confirm"] .path-copy { fill: #c7a64b; }
 

@@ -210,10 +210,10 @@ document.addEventListener("pointerdown", event => {
   setHighlightOpen(false);
 }, true);
 
-// Quiet fallback navigation: reveal the help link after eight seconds on the page.
+// Quiet fallback navigation: reveal the help link after three seconds on the page.
 // Once revealed, it remains available for the rest of the visit, including after Spiral.
 if (feelingLostLink) {
-  window.setTimeout(() => feelingLostLink.classList.add("is-visible"), 8000);
+  window.setTimeout(() => feelingLostLink.classList.add("is-visible"), 3000);
 }
 
 function setFeelingLostOpen(open) {

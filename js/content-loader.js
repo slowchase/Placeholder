@@ -7,7 +7,14 @@
 // ---------------------------------------------------------------------------
 
 async function fetchSiteContent(path) {
-  const response = await fetch(path, { cache: "no-store" });
+  // Bust both browser and GitHub Pages/CDN caches so edits to content.json
+  // show up as soon as the new deployment is available.
+  const separator = path.includes("?") ? "&" : "?";
+  const url = `${path}${separator}v=${Date.now()}`;
+  const response = await fetch(url, {
+    cache: "no-store",
+    headers: { "Cache-Control": "no-cache" }
+  });
   if (!response.ok) throw new Error(`Could not load ${path}: ${response.status}`);
   return response.json();
 }
@@ -23,6 +30,14 @@ async function loadHighlightContent() {
     if (typeof content.name === "string") name.textContent = content.name;
     if (typeof content.description === "string") description.textContent = content.description;
     if (typeof content.photo_alt === "string") photo.alt = content.photo_alt;
+
+    // The highlight image filename lives in content.json so it can be changed
+    // without touching HTML. Add a cache-busting query so replacing an image
+    // with the same filename is visible immediately after GitHub Pages updates.
+    const photoFile = typeof content.photo === "string" && content.photo.trim()
+      ? content.photo.trim()
+      : "photo.jpg";
+    photo.src = `./content/highlight/${encodeURIComponent(photoFile)}?v=${Date.now()}`;
   } catch (error) {
     console.warn("Highlight content file was not loaded; using inline fallback copy.", error);
   }
