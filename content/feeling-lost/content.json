@@ -1,0 +1,44 @@
+{
+  "about": {
+    "heading": "about",
+    "paragraphs": [
+      "placeholder is a weekly field note for finding something worth leaving the house for.",
+      "it is a small edit of exhibitions, openings, performances, food, music, and odd things happening around san francisco — made for curious people who want a useful list without feeds, algorithms, spam, or fluff."
+    ]
+  },
+  "contact": {
+    "heading": "contact",
+    "paragraphs": [
+      "send events, ideas, corrections, local tips, collaborations, questions, or a simple hello to events@placeholdersf.com."
+    ]
+  },
+  "faq": {
+    "heading": "faq",
+    "items": [
+      {
+        "question": "what is placeholder?",
+        "answer": "a weekly san francisco events calendar, edited down to things that feel worth noticing."
+      },
+      {
+        "question": "how do i subscribe?",
+        "answer": "click the email ring, type your address, then click the green subscribe circle."
+      },
+      {
+        "question": "how do i submit an event?",
+        "answer": "open the center controls and choose submit event."
+      },
+      {
+        "question": "can i send a correction or recommendation?",
+        "answer": "yes — email events@placeholdersf.com."
+      },
+      {
+        "question": "what does orbit do?",
+        "answer": "it pauses or resumes the motion of the rings without changing their positions."
+      },
+      {
+        "question": "what does spiral do?",
+        "answer": "it gathers the current ring content inward and resets the system back to the original two rings."
+      }
+    ]
+  }
+}

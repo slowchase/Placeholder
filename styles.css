@@ -456,11 +456,13 @@ body.is-submission-mode .brand:hover { opacity: .58; }
 .highlight-panel__photo {
   min-height: 0;
   background: rgba(225,229,227,.72);
-  display: grid;
-  place-items: center;
-  color: #929292;
-  font-size: 12px;
-  letter-spacing: .01em;
+  overflow: hidden;
+}
+.highlight-panel__photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .highlight-panel__copy { padding: 0 2px 2px; }
 .highlight-panel__name,

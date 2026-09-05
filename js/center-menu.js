@@ -197,6 +197,19 @@ if (mobileHighlightLink) {
   });
 }
 
+// The Highlight card can also be dismissed by clicking/tapping anywhere outside
+// the card. The desktop Highlight circle and mobile Highlight link are excluded
+// so they keep their existing toggle behavior.
+document.addEventListener("pointerdown", event => {
+  if (!highlightPanel?.classList.contains("is-open")) return;
+  const target = event.target;
+  if (!(target instanceof Element)) return;
+  if (highlightPanel.contains(target)) return;
+  if (highlightButton?.contains(target)) return;
+  if (mobileHighlightLink?.contains(target)) return;
+  setHighlightOpen(false);
+}, true);
+
 // Quiet fallback navigation: reveal the help link after eight seconds on the page.
 // Once revealed, it remains available for the rest of the visit, including after Spiral.
 if (feelingLostLink) {
