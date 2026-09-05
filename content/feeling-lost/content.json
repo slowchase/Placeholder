@@ -2,42 +2,62 @@
   "about": {
     "heading": "about",
     "paragraphs": [
-      "placeholder is a weekly field note for finding something worth leaving the house for.",
-      "it is a small edit of exhibitions, openings, performances, food, music, and odd things happening around san francisco — made for curious people who want a useful list without feeds, algorithms, spam, or fluff."
+      "placeholder is a weekly email event calendar of unique events happening in san francisco.",
+      "we're run by a small team that hand picks local, in-person events that seek to provide meaningful experiences to those who attend."
+    ]
+  },
+  "curation": {
+    "heading": "curation",
+    "paragraphs": [
+      "we're just starting out but expect the unexpected. do not expect to see large concerts, club event nights"
+    ]
+  },
+  "subscribing": {
+    "heading": "subscribing",
+    "paragraphs": [
+      "we only use your email to send you placeholder events once a week, nothing else.",
+      "your information is stored into a private database which is accessed by our mailer, nothing else."
     ]
   },
   "contact": {
     "heading": "contact",
     "paragraphs": [
-      "send events, ideas, corrections, local tips, collaborations, questions, or a simple hello to events@placeholdersf.com."
+      "events@placeholdersf.com"
     ]
   },
   "faq": {
     "heading": "faq",
     "items": [
       {
-        "question": "what is placeholder?",
-        "answer": "a weekly san francisco events calendar, edited down to things that feel worth noticing."
+        "question": "who the fuck designed this website?",
+        "answer": "that would be us, thank you."
       },
       {
-        "question": "how do i subscribe?",
-        "answer": "click the email ring, type your address, then click the green subscribe circle."
+        "question": "why the fuck did you design this website?",
+        "answer": "read the about section."
       },
       {
-        "question": "how do i submit an event?",
-        "answer": "open the center controls and choose submit event."
+        "question": "what kind of events can i expect from placeholder?",
+        "answer": "."
       },
       {
-        "question": "can i send a correction or recommendation?",
-        "answer": "yes — email events@placeholdersf.com."
+        "question": "can i submit an event?",
+        "answer": "there's an event submission page on this website, but please consider the types of events that we curate"
       },
       {
-        "question": "what does orbit do?",
-        "answer": "it pauses or resumes the motion of the rings without changing their positions."
+        "question": "i submitted an event and it wasn't listed. how come?",
+        "answer": "although we love all events, some just don't align with our mission. if you believe that there was a mistake, reach out to us at our email."
       },
       {
-        "question": "what does spiral do?",
-        "answer": "it gathers the current ring content inward and resets the system back to the original two rings."
+        "question": "do you have any influences?",
+        "answer": "absolutely. this project was conceptualized at the summer of ludd during a very specific and amazing panel. i thank them and still look up to them fondly."
+      },
+      {
+        "question": "do you currently/plan to make money from this?",
+        "answer": ["as of right now, this project is all funded by our team as a hobby. we all love events and see it as a way of giving back.",
+        "as time goes on we might adopt a patron subscription model for those who want to support what we do, while keeping the core of the project free for everyone.",
+        "we love www.nts.live and how they currenly finance their platform. check them out if you're unfamiliar."
+        ]
       }
     ]
   }
