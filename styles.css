@@ -728,6 +728,22 @@ body.is-submission-mode .brand:hover { opacity: .58; }
 .event-submit-button:hover .event-submit-button__svg,
 .event-submit-button:focus-visible .event-submit-button__svg { animation: button-spin 7s linear infinite; }
 
+.event-submit-button:disabled { cursor: default; }
+.event-submit-button.is-pending { opacity: .58; transform: none; }
+.event-submit-feedback {
+  position: absolute;
+  left: 50%;
+  width: min(360px, 82vw);
+  margin: 0;
+  transform: translate(-50%, 126px);
+  text-align: center;
+  font-size: .72rem;
+  line-height: 1.35;
+  color: #777;
+  letter-spacing: 0;
+  pointer-events: none;
+}
+
 /* During a successful event handoff the form button becomes viewport-fixed and
    travels to the exact center occupied by Subscribe. */
 .event-submit-button.is-handoff {

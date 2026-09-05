@@ -258,10 +258,51 @@ function addMobileEventSubmittedRing() {
   layoutRings();
 }
 
-function submitEventForm() {
-  if (eventSubmitting || !eventSubmitButton || !validateEventForm()) return;
-  eventSubmitting = true;
-  typingToken += 1;
+function getEventFieldValue(key) {
+  const row = eventSubmission.querySelector(`.event-field[data-key="${key}"]`);
+  const control = fieldControl(row);
+  if (!control) return "";
+  if (control.type === "checkbox") return control.checked;
+  return control.value.trim();
+}
+
+function buildEventSubmissionPayload() {
+  return {
+    event_name: getEventFieldValue("event-name"),
+    date_text: getEventFieldValue("date"),
+    time_text: getEventFieldValue("time"),
+    location: getEventFieldValue("location"),
+    description: getEventFieldValue("description"),
+    link_contact: getEventFieldValue("link"),
+    keep_contact_private: !!getEventFieldValue("keep-contact-private")
+  };
+}
+
+function setEventSubmitFeedback(message = "") {
+  if (!eventSubmitWrap) return;
+  let feedback = eventSubmitWrap.querySelector(".event-submit-feedback");
+  if (!feedback && message) {
+    feedback = document.createElement("p");
+    feedback.className = "event-submit-feedback";
+    feedback.setAttribute("role", "status");
+    feedback.setAttribute("aria-live", "polite");
+    eventSubmitWrap.appendChild(feedback);
+  }
+  if (feedback) feedback.textContent = message;
+}
+
+function setEventFormPending(pending) {
+  eventSubmission.querySelectorAll("input, textarea, select").forEach(control => {
+    control.disabled = pending;
+  });
+  if (eventSubmitButton) {
+    eventSubmitButton.disabled = pending;
+    eventSubmitButton.classList.toggle("is-pending", pending);
+  }
+}
+
+function runEventSubmissionSuccess() {
+  if (!eventSubmitButton || !eventSubmitWrap) return;
 
   const button = eventSubmitButton;
   const rect = button.getBoundingClientRect();
@@ -269,6 +310,7 @@ function submitEventForm() {
   const targetLeft = window.innerWidth / 2 - targetSize / 2;
   const targetTop = window.innerHeight / 2 - targetSize / 2;
 
+  setEventSubmitFeedback("");
   button.classList.add("is-handoff");
   button.style.left = `${rect.left}px`;
   button.style.top = `${rect.top}px`;
@@ -277,7 +319,7 @@ function submitEventForm() {
   button.style.background = "linear-gradient(145deg, #fff4bd 0%, #f4dda0 52%, #e8c977 100%)";
   eventSubmitWrap.style.height = `${rect.height}px`;
 
-  // Freeze the form where it is, then let the button detach from it.
+  // Freeze the form only after Supabase has accepted the submission.
   eventSubmission.querySelectorAll("input, textarea, select").forEach(input => input.disabled = true);
   requestAnimationFrame(() => {
     eventSubmission.style.transition = "opacity 420ms ease";
@@ -290,7 +332,6 @@ function submitEventForm() {
   });
 
   window.setTimeout(() => {
-    // Restore the full orbital plane without any scroll-controlled camera state.
     submissionActive = false;
     setSubmissionMode(false);
     solarSystem.classList.add("is-event-success");
@@ -317,6 +358,49 @@ function submitEventForm() {
   }, 930);
 
   window.setTimeout(() => solarSystem.classList.remove("is-event-success"), 1900);
+}
+
+async function submitEventForm() {
+  if (eventSubmitting || !eventSubmitButton || !validateEventForm()) return;
+
+  eventSubmitting = true;
+  typingToken += 1;
+  setEventSubmitFeedback("");
+  setEventFormPending(true);
+
+  try {
+    if (!SUBMIT_EVENT_ENDPOINT) throw new Error("missing_endpoint");
+
+    const response = await fetch(SUBMIT_EVENT_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(buildEventSubmissionPayload())
+    });
+
+    let result = null;
+    try { result = await response.json(); } catch (_) {}
+
+    if (response.ok) {
+      runEventSubmissionSuccess();
+      return;
+    }
+
+    setEventFormPending(false);
+    eventSubmitting = false;
+
+    if (response.status === 429) {
+      setEventSubmitFeedback("temporarily unavailable — please try again later");
+    } else if (response.status >= 400 && response.status < 500) {
+      setEventSubmitFeedback("please check the event details and try again");
+    } else {
+      setEventSubmitFeedback("couldn't submit — please try again");
+    }
+  } catch (error) {
+    console.error("event submission failed", error);
+    setEventFormPending(false);
+    eventSubmitting = false;
+    setEventSubmitFeedback("couldn't submit — please try again");
+  }
 }
 
 function returnToOrbit() {
