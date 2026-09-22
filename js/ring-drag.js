@@ -467,8 +467,16 @@ subscribeButton.addEventListener("click", async () => {
   // database and SES confirmation email are processing.
   showSubscribeConfirmationRing("please wait...");
 
-  try {
-    const response = await fetch(
+// Give the browser a frame to actually paint the
+// "please wait..." ring before starting the request.
+await new Promise(resolve => {
+  requestAnimationFrame(() => {
+    requestAnimationFrame(resolve);
+  });
+});
+
+try {
+  const response = await fetch(
       SUBSCRIBE_ENDPOINT,
       {
         method: "POST",
