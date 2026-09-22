@@ -469,59 +469,55 @@ subscribeButton.addEventListener("click", async () => {
     to its successful state yet.
   */
 
-  showSubscribeLoadingRing();
+    showSubscribeLoadingRing();
 
 
-  /*
-    Allow the SVG/layout system to actually render the new
-    ring before beginning the network request.
-
-    Two animation frames gives layoutRings() and the browser's
-    SVG renderer a complete visual update.
-  */
-
-  await new Promise(resolve => {
-    requestAnimationFrame(() => {
-      requestAnimationFrame(resolve);
-    });
-  });
-
-
-  // ---------------------------------------------------------
-  // SUPABASE REQUEST
-  // ---------------------------------------------------------
-
-  try {
-    const response = await fetch(
-      SUBSCRIBE_ENDPOINT,
-      {
-        method: "POST",
-
-        headers: {
-          "Content-Type": "application/json"
-        },
-
-        body: JSON.stringify({
-          email
-        })
-      }
-    );
-
-
-    let payload = null;
-
+    // ---------------------------------------------------------
+    // SUPABASE REQUEST + MINIMUM 2-SECOND LOADING STATE
+    // ---------------------------------------------------------
+    
     try {
-      payload = await response.json();
-    } catch (_) {}
-
-
-    if (!response.ok) {
-      throw new Error(
-        payload?.error ||
-        payload?.message ||
-        "Subscription failed"
+      const minimumLoadingTime = new Promise(resolve => {
+        setTimeout(resolve, 2000);
+      });
+    
+      const subscribeRequest = fetch(
+        SUBSCRIBE_ENDPOINT,
+        {
+          method: "POST",
+    
+          headers: {
+            "Content-Type": "application/json"
+          },
+    
+          body: JSON.stringify({
+            email
+          })
+        }
       );
-    }
+    
+      const [response] = await Promise.all([
+        subscribeRequest,
+        minimumLoadingTime
+      ]);
+    
+    
+      let payload = null;
+    
+      try {
+        payload = await response.json();
+      } catch (_) {}
+    
+    
+      if (!response.ok) {
+        throw new Error(
+          payload?.error ||
+          payload?.message ||
+          "Subscription failed"
+        );
+      }
+
+
 
 
     // -------------------------------------------------------
