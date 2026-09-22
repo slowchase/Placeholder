@@ -316,6 +316,7 @@ function showSubscribeLoadingRing() {
   rings.unshift(ring);
 
   layoutRings();
+  renderGeometry();
 }
 
 function showSubscribeConfirmationRing() {
