@@ -261,19 +261,30 @@ function getSubscribeConfirmationRing() {
 function removeSubscribeConfirmationRing() {
   const ring = getSubscribeConfirmationRing();
   if (!ring) return;
+
   const index = rings.indexOf(ring);
   if (index >= 0) rings.splice(index, 1);
+
   ring.dom?.wrapper?.remove();
   layoutRings();
 }
 
-function showSubscribeConfirmationRing() {
-  if (getSubscribeConfirmationRing()) return;
+function showSubscribeConfirmationRing(text = "check your email") {
+  const existingRing = getSubscribeConfirmationRing();
+
+  // If the ring already exists, update its text without
+  // removing/recreating it so its position and motion stay intact.
+  if (existingRing) {
+    existingRing.text = text;
+    existingRing.dom.textPath.textContent = text;
+    existingRing.dom.textHitPath.textContent = text;
+    return existingRing;
+  }
 
   const ring = makeRing({
     id: "subscribe-confirm",
     kind: "subscribe-confirm",
-    text: "check your email",
+    text,
     lineDuration: 24,
     textDuration: 34,
     textStart: 8,
@@ -285,6 +296,8 @@ function showSubscribeConfirmationRing() {
   ring.currentRadius = 74;
   rings.unshift(ring);
   layoutRings();
+
+  return ring;
 }
 
 let emailPromptText = "";
@@ -296,16 +309,250 @@ function renderEmailText(displayed, showCaret = false) {
   ring.dom.textPath.replaceChildren();
 
   if (showCaret) {
-    const caret = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
+    const caret = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "tspan"
+    );
+
     caret.setAttribute("class", "email-box-caret");
     caret.textContent = "| ";
+
     ring.dom.textPath.appendChild(caret);
   }
 
-  ring.dom.textPath.appendChild(document.createTextNode(displayed));
+  ring.dom.textPath.appendChild(
+    document.createTextNode(displayed)
+  );
 
   ring.dom.textHitPath.textContent = displayed;
 }
+
+function syncEmailDisplay() {
+  const ring = getEmailRing();
+  if (!ring) return;
+
+  const value = emailInput.value.trim();
+  const focused = document.activeElement === emailInput;
+  const displayed = value || emailPromptText || "email";
+
+  renderEmailText(displayed, focused && !value);
+
+  if (!subscribed) {
+    ring.dom.wrapper.classList.remove("is-subscribed");
+  }
+}
+
+function setStatus(message = "") {
+  statusMessage.textContent = message;
+  statusMessage.classList.toggle(
+    "is-visible",
+    Boolean(message)
+  );
+}
+
+emailInput.addEventListener("focus", () => {
+  const ring = getEmailRing();
+
+  ring.dom.wrapper.classList.add(
+    "is-email-focused"
+  );
+
+  syncEmailDisplay();
+
+  subscribeButton.classList.remove("is-error");
+
+  setStatus("");
+});
+
+emailInput.addEventListener("blur", () => {
+  const ring = getEmailRing();
+
+  ring.dom.wrapper.classList.remove(
+    "is-email-focused"
+  );
+
+  if (!emailInput.value.trim()) {
+    emailPromptText = "";
+  }
+
+  syncEmailDisplay();
+});
+
+emailInput.addEventListener("input", () => {
+  subscribed = false;
+
+  removeSubscribeConfirmationRing();
+
+  emailPromptText = "";
+
+  subscribeButton.classList.remove(
+    "is-subscribed",
+    "is-error"
+  );
+
+  subscribeButtonLabel.textContent = "subscribe";
+
+  if (subscribeLabelPath) {
+    subscribeLabelPath.setAttribute(
+      "d",
+      "M 12.7 71 A 42 42 0 0 0 87.3 71"
+    );
+  }
+
+  getEmailRing().dom.wrapper.classList.remove(
+    "is-subscribed"
+  );
+
+  syncEmailDisplay();
+
+  setStatus("");
+});
+
+subscribeButton.addEventListener("click", async () => {
+  const email = emailInput.value.trim();
+  const emailRing = getEmailRing();
+
+  if (!email || !emailInput.checkValidity()) {
+    subscribed = false;
+
+    subscribeButton.classList.remove(
+      "is-subscribed"
+    );
+
+    subscribeButton.classList.add("is-error");
+
+    subscribeButtonLabel.textContent =
+      "enter email";
+
+    if (subscribeLabelPath) {
+      subscribeLabelPath.setAttribute(
+        "d",
+        "M 12.7 71 A 42 42 0 0 0 87.3 71"
+      );
+    }
+
+    if (!email) {
+      emailPromptText = "type email here";
+    }
+
+    setStatus(
+      "Enter a valid email address first."
+    );
+
+    emailInput.focus();
+
+    syncEmailDisplay();
+
+    return;
+  }
+
+  if (!SUBSCRIBE_ENDPOINT) {
+    subscribeButton.classList.add("is-error");
+
+    subscribeButtonLabel.textContent =
+      "not connected";
+
+    setStatus(
+      "Subscribe endpoint is not configured yet."
+    );
+
+    return;
+  }
+
+  subscribeButton.disabled = true;
+
+  setStatus("");
+
+  // Show immediate feedback while the Edge Function,
+  // database and SES confirmation email are processing.
+  showSubscribeConfirmationRing("please wait...");
+
+  try {
+    const response = await fetch(
+      SUBSCRIBE_ENDPOINT,
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          email
+        })
+      }
+    );
+
+    let payload = null;
+
+    try {
+      payload = await response.json();
+    } catch (_) {}
+
+    if (!response.ok) {
+      throw new Error(
+        payload?.error ||
+        payload?.message ||
+        "Subscription failed"
+      );
+    }
+
+    subscribed = true;
+
+    subscribeButton.classList.remove("is-error");
+
+    subscribeButton.classList.add(
+      "is-subscribed"
+    );
+
+    subscribeButtonLabel.textContent =
+      "subscribed";
+
+    if (subscribeLabelPath) {
+      subscribeLabelPath.setAttribute(
+        "d",
+        "M 12.7 71 A 42 42 0 0 0 87.3 71"
+      );
+    }
+
+    emailRing.dom.wrapper.classList.add(
+      "is-subscribed"
+    );
+
+    // Keep the same ring and simply change its text.
+    showSubscribeConfirmationRing(
+      "check your email"
+    );
+
+    emailInput.blur();
+
+    setStatus("");
+
+  } catch (error) {
+    subscribed = false;
+
+    // Remove the temporary "please wait..." ring if
+    // the request fails.
+    removeSubscribeConfirmationRing();
+
+    subscribeButton.classList.remove(
+      "is-subscribed"
+    );
+
+    subscribeButton.classList.add("is-error");
+
+    subscribeButtonLabel.textContent =
+      "try again";
+
+    setStatus(
+      error?.message ||
+      "Could not subscribe. Please try again."
+    );
+
+  } finally {
+    subscribeButton.disabled = false;
+  }
+});
 
 function syncEmailDisplay() {
   const ring = getEmailRing();
