@@ -132,6 +132,10 @@ button { -webkit-tap-highlight-color: transparent; }
 .logical-ring[data-kind="email"] .path-hit { font-size: 45px; }
 .logical-ring[data-kind="email"] .path-copy { fill: var(--muted); }
 .logical-ring.is-subscribed .path-copy { fill: var(--green-active); }
+.logical-ring[data-kind="subscribe-loading"] .ring-line { stroke: var(--line); }
+.logical-ring[data-kind="subscribe-loading"] .path-copy { fill: var(--ink); }
+.logical-ring[data-kind="subscribe-loading"] .path-hit { pointer-events: none; }
+
 .logical-ring[data-kind="subscribe-confirm"] .ring-line { stroke: var(--green-active); }
 .logical-ring[data-kind="subscribe-confirm"] .path-copy { fill: var(--green-active); }
 
