@@ -132,7 +132,7 @@ async function loadFeelingLostContent() {
       fragment.appendChild(section);
     }
 
-    if (fragment.childNodes.length) inner.replaceChildren(fragment);
+    inner.replaceChildren(fragment);
   } catch (error) {
     console.warn("Feeling Lost content file was not loaded; using inline fallback copy.", error);
   }
