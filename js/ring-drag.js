@@ -342,6 +342,20 @@ function showSubscribeConfirmationRing() {
   layoutRings();
 }
 
+let emailPromptText = "";
+
+function renderEmailText(text, showCaret = false) {
+  const ring = getEmailRing();
+  if (!ring?.dom) return;
+
+  const value = String(text ?? "");
+  const visibleText = showCaret ? `${value}|` : value;
+
+  ring.dom.textPath.textContent = visibleText;
+  ring.dom.textHitPath.textContent = visibleText;
+  ring.text = value;
+}
+
 function syncEmailDisplay() {
   const ring = getEmailRing();
   if (!ring) return;

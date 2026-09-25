@@ -765,3 +765,16 @@ function beginSpiralReset() {
 }
 
 
+
+
+// Bind the visible Spiral control to the reset animation.
+if (spiralButton) {
+  spiralButton.addEventListener("click", event => {
+    event.preventDefault();
+    event.stopPropagation();
+    beginSpiralReset();
+    if (typeof releaseCenterControlFocus === "function") {
+      releaseCenterControlFocus(spiralButton);
+    }
+  });
+}
