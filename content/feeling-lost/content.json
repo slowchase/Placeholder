@@ -29,29 +29,7 @@ are free or relatively inexpensive. we will typically not post concerts, club ev
   "faq": {
     "heading": "faq",
     "items": [
-      {
-        "question": "what kind of events can i expect from placeholder?",
-        "answer": "we will be posting san francisco classic events such as byobw, hunky jesus, and yes even bay to breakers, amongst other things. however, we will have a focus on smaller events that"
-      },
-      {
-        "question": "can i submit an event?",
-        "answer": "there's an event submission page on this website, but please consider the types of events that we curate"
-      },
-      {
-        "question": "i submitted an event and it wasn't listed. how come?",
-        "answer": "although we love all events, some just don't align with our mission. if you believe that there was a mistake, reach out to us at our email."
-      },
-      {
-        "question": "do you have any influences?",
-        "answer": "absolutely. this project was conceptualized at the summer of ludd during a very specific and amazing panel. i thank them and still look up to them fondly."
-      },
-      {
-        "question": "do you currently/plan to make money from this?",
-        "answer": ["as of right now, this project is all funded by our team as a hobby. we all love events and see it as a way of giving back.",
-        "as time goes on we might adopt a patron subscription model for those who want to support what we do, while keeping the core of the project free for everyone.",
-        "we love www.nts.live and how they currenly finance their platform. check them out if you're unfamiliar."
-        ]
-      }
+      
     ]
   }
 }
