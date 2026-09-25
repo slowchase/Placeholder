@@ -26,10 +26,10 @@ are free or relatively inexpensive. we will typically not post concerts, club ev
       "events@placeholdersf.com"
     ]
   },
-  if (
-  content.faq &&
-  Array.isArray(content.faq.items) &&
-  content.faq.items.length > 0
-) {
+  "faq": {
+    "heading": "faq",
+    "items": [
+      
+    ]
   }
 }
